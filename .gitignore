@@ -28,3 +28,5 @@ hs_err_pid*
 # Idea IDE
 *.iml
 .idea/
+
+tarc-api/target
