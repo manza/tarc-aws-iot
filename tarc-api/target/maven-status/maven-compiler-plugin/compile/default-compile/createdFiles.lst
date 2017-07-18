@@ -1,6 +1,0 @@
-service/AlertService.class
-tarc/controller/TwitterController.class
-tarc/model/Alert.class
-tarc/model/Tweet.class
-tarc/service/TwitterService.class
-tarc/App.class
