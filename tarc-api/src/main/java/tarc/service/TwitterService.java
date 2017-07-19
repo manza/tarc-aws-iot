@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 public class TwitterService {
 
-    @Scheduled(fixedRate = 60000 * 5)
+    @Scheduled(fixedRate = 60000)
     public void cacheTweets() {
 
         List<Tweet> tweetList = new ArrayList<>();
@@ -36,7 +36,7 @@ public class TwitterService {
 
         try {
             Query query = new Query(twitterToSearch);
-            query.setCount(50);
+            query.setCount(15);
             QueryResult result;
 
             result = twitter.search(query);

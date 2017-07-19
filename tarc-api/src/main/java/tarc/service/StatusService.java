@@ -20,52 +20,68 @@ public class StatusService {
     LightService lightService;
 
     @Autowired
-    TiltService tiltService;
+    EarthQuakeService earthQuakeService;
 
     public Status getStatus() {
 
-        String curStatus = "Normal";
+        double tempLast = 0.0;
+        double tempPrevLast = 0.0;
+        boolean alarmTemp = false;
+
+        double lightLast = 0.0;
+        double lightPrevLast = 0.0;
+        boolean alarmLight = false;
 
         Status status = new Status();
 
+        String curStatus = "Normal";
+
         List<Temp> tempList = tempService.getTemp();
-        if (tempList.size() > 0) {
-            status.setTemp(tempList.get(tempList.size() - 1).getTemperature());
-        }
-
         List<Light> lightList = lightService.getLight();
-        if (lightList.size() > 0) {
+        List<Tilt> tiltList = earthQuakeService.getTilt();
+
+        if ((tempList.size() >= 2) && (lightList.size() >= 2) && (tiltList.size() > 0)) {
+
+            status.setNumberTweetsEnchente(App.tweetList.size());
+            status.setTemp(tempList.get(tempList.size() - 1).getTemperature());
             status.setLight(lightList.get(lightList.size() - 1).getLight());
-        }
 
-        List<Tilt> tiltList = tiltService.getTilt();
-        boolean earthQuake = false;
-        for (int i = 0; i < tiltList.size(); i++) {
-            if (tiltList.get(i).isEarthquake()) {
-                earthQuake = true;
-                break;
+            // Manage Status
+            lightLast = lightList.get(lightList.size() - 1).getLight();
+            lightPrevLast = lightList.get(lightList.size() - 2).getLight();
+            alarmLight = Math.abs(lightLast - lightPrevLast) >= 200;
+
+            tempLast = tempList.get(tempList.size() - 1).getTemperature();
+            tempPrevLast = tempList.get(tempList.size() - 2).getTemperature();;
+            alarmTemp = Math.abs(tempLast - tempPrevLast) >= 0.5;
+
+            boolean earthQuake = false;
+            for (int i = 0; i < tiltList.size(); i++) {
+                if (tiltList.get(i).isEarthquake()) {
+                    earthQuake = true;
+                    break;
+                }
             }
-        }
-        status.setEarthquake(earthQuake);
+            status.setEarthquake(earthQuake);
 
-        status.setNumberTweetsEnchente(App.tweetList.size());
+            if (alarmLight && alarmTemp) {
+                curStatus = "Temporal";
+            }
 
-        // Definition of Status
-        status.setStatus(curStatus);
+            if (alarmLight && alarmTemp && App.tweetList.size() >= 2) {
+                curStatus = "Temporal - Enchente";
+            }
 
-        if ((status.getNumberTweetsEnchente() > 5) &&
-                (status.getLight() >= 0 && status.getLight() <= 10) &&
-                (status.getTemp() >= 20 && status.getTemp() <= 50) &&
-                (!status.isEarthquake())) {
-            status.setStatus("Temporal");
-        }
+            if (!alarmLight && !alarmTemp && App.tweetList.size() >= 2) {
+                curStatus = "Enchente";
+            }
 
-        if ((!status.isEarthquake()) && (status.getNumberTweetsEnchente() > 5)) {
-            status.setStatus("Enchente");
-        }
+            if (status.isEarthquake()) {
+                curStatus = "Terremoto";
+            }
 
-        if (status.isEarthquake()) {
-            status.setStatus("Terremoto");
+            // Definition of Status
+            status.setStatus(curStatus);
         }
 
         return status;
