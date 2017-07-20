@@ -52,7 +52,8 @@ public class StatusService {
             alarmLight = Math.abs(lightLast - lightPrevLast) >= 200;
 
             tempLast = tempList.get(tempList.size() - 1).getTemperature();
-            tempPrevLast = tempList.get(tempList.size() - 2).getTemperature();;
+            tempPrevLast = tempList.get(tempList.size() - 2).getTemperature();
+            ;
             alarmTemp = Math.abs(tempLast - tempPrevLast) >= 0.5;
 
             boolean earthQuake = false;
